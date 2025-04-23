@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 )
 
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
@@ -32,19 +31,4 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.WriteHeader(code)
 	w.Write(dat)
-}
-
-func profaneFilter(str string) string {
-	strSplit := strings.Split(str, " ")
-	for i, word := range strSplit {
-		switch strings.ToLower(word) {
-		case "kerfuffle":
-			fallthrough
-		case "sharbert":
-			fallthrough
-		case "fornax":
-			strSplit[i] = "****"
-		}
-	}
-	return strings.Join(strSplit, " ")
 }
