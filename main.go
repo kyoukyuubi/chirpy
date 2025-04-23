@@ -22,6 +22,8 @@ func main() {
 	mux.Handle("/app/", cfg.middlewareMetricsInc(handler))
 
 	mux.HandleFunc("GET /api/healthz", healthzHandler)
+	mux.HandleFunc("POST /api/validate_chirp", handlerChirpsValidate)
+
 	mux.HandleFunc("GET /admin/metrics", cfg.metricsHandler)
 	mux.HandleFunc("POST /admin/reset", cfg.resetHandler)
 
