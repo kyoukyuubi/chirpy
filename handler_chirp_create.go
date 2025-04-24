@@ -33,12 +33,14 @@ func (cfg *apiConfig) handlerChirpCreate(w http.ResponseWriter, r *http.Request)
 	err := decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode params", err)
+		return
 	}
 
 	// validate the body
 	cleaned, err := chirpsValidate(params.Body)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't validate chirp", err)
+		return
 	}
 
 	// insert chirp into database
@@ -51,6 +53,7 @@ func (cfg *apiConfig) handlerChirpCreate(w http.ResponseWriter, r *http.Request)
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp", err)
+		return
 	}
 
 	// respond with the nerly created chirp
