@@ -59,6 +59,8 @@ func main() {
 
 	mux.HandleFunc("POST /api/users", cfg.handlerAddUser)
 
+	mux.HandleFunc("POST /api/login", cfg.handlerUserLogin)
+
 	mux.HandleFunc("GET /admin/metrics", cfg.metricsHandler)
 	mux.HandleFunc("POST /admin/reset", cfg.resetHandler)
 
@@ -69,4 +71,5 @@ func main() {
 	
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(server.ListenAndServe())
+
 }

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kyoukyuubi/chirpy/internal/auth"
 	"github.com/kyoukyuubi/chirpy/internal/database"
 )
 
@@ -19,6 +21,7 @@ type User struct {
 func (cfg *apiConfig) handlerAddUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Email string
+		Password string
 	}
 
 	// decode the response and handle errors
@@ -30,12 +33,23 @@ func (cfg *apiConfig) handlerAddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// has the password, handling the errors
+	hash, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't hash the password", err)
+		return
+	}
+
 	// input the user into the database and handle errors
 	user, err := cfg.dbQueries.CreateUser(r.Context(), database.CreateUserParams{
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Email: params.Email,
+		HashedPassword: sql.NullString{
+			String: hash,
+			Valid: true,
+		},
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't insert user into database", err)
