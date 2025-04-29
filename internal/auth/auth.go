@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// hash generate
 func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -19,6 +22,7 @@ func HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
+// check hash
 func CheckPasswordHash(hash, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
@@ -27,6 +31,7 @@ func CheckPasswordHash(hash, password string) error {
 	return nil
 }
 
+// make JWT token
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer: "chirpy",
@@ -42,6 +47,7 @@ func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (str
 	return signedToken, nil
 }
 
+// validate JWT token
 func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -66,6 +72,7 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	return uuid.Nil, fmt.Errorf("invalid token")
 }
 
+// get token from header
 func GetBearerToken(headers http.Header) (string, error) {
 	headerList := headers.Values("Authorization")
 	token := ""
@@ -85,4 +92,18 @@ func GetBearerToken(headers http.Header) (string, error) {
 		return token, nil
 	}
 	return "", fmt.Errorf("no token found")
+}
+
+// make refresh token
+func MakeRefreshToken() (string, error) {
+	// make a key which is used to generate a 256-bit of random data
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+	if err != nil {
+		return "", err
+	}
+
+	// convert the random data into hex string
+	hex := hex.EncodeToString(key)
+	return hex, nil
 }
