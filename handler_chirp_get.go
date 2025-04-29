@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +26,14 @@ func (cfg *apiConfig) handlerChirpSelectAll(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
+	// store the sort direction
+	sortDirection := "asc"
+	sortDirectionParam := r.URL.Query().Get("sort")
+	if sortDirectionParam == "desc" {
+		sortDirection = "desc"
+	}
+
+
 	// construct a slice of structs for better control
 	returnChirp := []Chirp{}
 	for _, chirp := range chirps {
@@ -39,6 +48,15 @@ func (cfg *apiConfig) handlerChirpSelectAll(w http.ResponseWriter, r *http.Reque
 			User_ID: chirp.UserID,
 		})
 	}
+
+	sort.Slice(returnChirp, func(i, j int) bool {
+		if sortDirection == "desc" {
+			return returnChirp[i].CreatedAt.After(returnChirp[j].CreatedAt)
+		}
+		return returnChirp[i].CreatedAt.Before(returnChirp[j].CreatedAt)
+	})
+
+
 	respondWithJSON(w, http.StatusOK, returnChirp)
 }
 
