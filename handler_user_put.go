@@ -66,14 +66,16 @@ func (cfg *apiConfig) handlerUpdateUser (w http.ResponseWriter, r *http.Request)
 	// Make return struct
 	updatedUser := struct {
 		User_id uuid.UUID `json:"id"`
-		CreatedAt time.Time
-		UpdatedAt time.Time
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
 		Email string `json:"email"`
+		IsChirpyRed bool `json:"is_chirpy_red"`
 	}{
 		User_id: user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email: user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	}
 
 	// respond with the new user minus pass
