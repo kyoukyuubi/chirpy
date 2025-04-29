@@ -107,3 +107,24 @@ func MakeRefreshToken() (string, error) {
 	hex := hex.EncodeToString(key)
 	return hex, nil
 }
+
+// get polka get
+func GetAPIKey(headers http.Header) (string, error) {
+	headerList := headers.Values("Authorization")
+	key := ""
+	for _, header := range headerList {
+		words := strings.Fields(header)
+		if len(words) == 0 {
+			return "", fmt.Errorf("no key found")
+		}
+
+		if len(words) == 2 && words[0] == "ApiKey" {
+			key = words[1]
+			break
+		}
+	}
+	if key != "" {
+		return key, nil
+	}
+	return "", fmt.Errorf("no token found")
+}

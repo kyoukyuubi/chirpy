@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/kyoukyuubi/chirpy/internal/auth"
 	"github.com/kyoukyuubi/chirpy/internal/database"
 )
 
@@ -19,10 +21,23 @@ func (cfg *apiConfig) handlerUpgradeUser(w http.ResponseWriter, r *http.Request)
 		} `json:"data"`
 	}
 
+	// get the header ApiKey
+	key, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "couldn't get key", err)
+		return
+	}
+
+	// check if key matches
+	if key != cfg.polkaKey {
+		respondWithError(w, http.StatusUnauthorized, "invalid key", fmt.Errorf("key invalid"))
+		return
+	}
+
 	// get the request
 	decoder := json.NewDecoder(r.Body)
 	params := paramters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't decode params", err)
 		return
