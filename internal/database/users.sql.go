@@ -116,7 +116,7 @@ func (q *Queries) UpdateUserWithID(ctx context.Context, arg UpdateUserWithIDPara
 
 const upgradeUser = `-- name: UpgradeUser :one
 UPDATE users
-SET is_chirpy_red = $1
+SET is_chirpy_red = $1, updated_at = NOW()
 WHERE id = $2
 RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `

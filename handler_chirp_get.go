@@ -14,9 +14,23 @@ func (cfg *apiConfig) handlerChirpSelectAll(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// get the author id and parse it as an uuid if it isn't
+	authorID := uuid.Nil
+	authorIDString := r.URL.Query().Get("author_id")
+	if authorIDString != "" {
+		authorID, err = uuid.Parse(authorIDString)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid auther ID", err)
+			return
+		}
+	}
+
 	// construct a slice of structs for better control
 	returnChirp := []Chirp{}
 	for _, chirp := range chirps {
+		if authorID != uuid.Nil && chirp.UserID != authorID {
+			continue
+		}
 		returnChirp = append(returnChirp, Chirp{
 			ID: chirp.ID,
 			CreatedAt: chirp.CreatedAt,
